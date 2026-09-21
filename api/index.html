@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>Adewa</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f7fb;
+            font-family: Arial, sans-serif;
+            color: #111827;
+        }
+
+        .app {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .balance-card {
+            background: #111827;
+            color: white;
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+
+        .balance-title {
+            opacity: .7;
+            font-size: 14px;
+        }
+
+        .balance {
+            font-size: 38px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            min-height: 110px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card-text {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        button {
+            width: 100%;
+            border: 0;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: #111827;
+            color: white;
+        }
+
+        .join {
+            background: #2563eb;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .check {
+            background: #16a34a;
+            color: white;
+            margin-top: 14px;
+        }
+
+        #gate {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #f5f7fb;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .gate-box {
+            max-width: 500px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+        }
+
+        .gate-title {
+            font-size: 25px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .gate-description {
+            color: #6b7280;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .channel {
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            margin-bottom: 12px;
+        }
+
+        .channel-name {
+            font-weight: 700;
+        }
+
+        .status {
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .joined {
+            color: #16a34a;
+        }
+
+        .not-joined {
+            color: #dc2626;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="loading" class="loading">
+    Loading...
+</div>
+
+
+<!-- =====================================================
+     CHANNEL GATE
+===================================================== -->
+
+<div id="gate" class="hidden">
+
+    <div class="gate-box">
+
+        <div class="gate-title">
+            Join Required Channels
+        </div>
+
+        <div class="gate-description">
+            Please join all required channels before
+            accessing the Adewa Mini App.
+        </div>
+
+        <div id="channels"></div>
+
+        <button
+            class="check"
+            onclick="checkMembership()"
+        >
+            Check Membership
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN APP
+===================================================== -->
+
+<div id="app" class="app hidden">
+
+    <div class="balance-card">
+
+        <div class="balance-title">
+            Available Balance
+        </div>
+
+        <div class="balance">
+            <span id="balance">
+                0.00
+            </span>
+            ETB
+        </div>
+
+    </div>
+
+
+    <div class="grid">
+
+        <div
+            class="card"
+            onclick="startAd()"
+        >
+            <div class="card-title">
+                Watch Ads
+            </div>
+
+            <div class="card-text">
+                Watch ads and earn rewards.
+            </div>
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Tasks
+            </div>
+
+            <div class="card-text">
+                Complete available tasks.
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Spin
+            </div>
+
+            <div class="card-text">
+                Spin and earn rewards.
+            </div>
+
+        </div>
+
+
+        <div
+            class="card"
+            onclick="withdraw()"
+        >
+
+            <div class="card-title">
+                Withdraw
+            </div>
+
+            <div class="card-text">
+                Request your payment.
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Referral
+            </div>
+
+            <div class="card-text">
+                Invite friends and earn.
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Profile
+            </div>
+
+            <div class="card-text">
+                Your account information.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const tg = window.Telegram.WebApp;
+
+tg.ready();
+tg.expand();
+
+
+const API = "";
+
+
+let telegramUser = null;
+
+
+/* =====================================================
+   TELEGRAM USER
+===================================================== */
+
+function getTelegramUser() {
+
+    telegramUser = tg.initDataUnsafe?.user;
+
+    if (!telegramUser) {
+
+        alert(
+            "Please open this application from Telegram."
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+
+/* =====================================================
+   API
+===================================================== */
+
+async function api(
+    endpoint,
+    data = {}
+) {
+
+    const response = await fetch(
+        API + endpoint,
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(data)
+        }
+    );
+
+    return await response.json();
+}
+
+
+/* =====================================================
+   INIT
+===================================================== */
+
+async function init() {
+
+    if (!getTelegramUser()) {
+        return;
+    }
+
+    const result = await api(
+        "/api/init",
+        {
+            telegram_id: telegramUser.id,
+            username: telegramUser.username || "",
+            first_name: telegramUser.first_name || ""
+        }
+    );
+
+
+    if (!result.ok) {
+
+        alert(
+            result.error || "Initialization failed"
+        );
+
+        return;
+    }
+
+
+    renderChannels(
+        result.membership
+    );
+
+
+    if (
+        result.membership &&
+        result.membership.all_joined
+    ) {
+
+        showApp();
+
+    } else {
+
+        showGate();
+
+    }
+
+
+    updateBalance(
+        result.user.balance
+    );
+}
+
+
+/* =====================================================
+   CHANNELS
+===================================================== */
+
+function renderChannels(
+    membership
+) {
+
+    const container =
+        document.getElementById(
+            "channels"
+        );
+
+    container.innerHTML = "";
+
+
+    const channels =
+        membership?.channels || [
+
+            {
+                channel: "@ABDU_CRYPTO",
+                joined: false
+            },
+
+            {
+                channel: "@proof_chnallel",
+                joined: false
+            },
+
+            {
+                channel: "@m_r_work1",
+                joined: false
+            }
+
+        ];
+
+
+    channels.forEach(
+        item => {
+
+            const box =
+                document.createElement(
+                    "div"
+                );
+
+            box.className =
+                "channel";
+
+
+            const username =
+                item.channel.replace(
+                    "@",
+                    ""
+                );
+
+
+            box.innerHTML = `
+
+                <div class="channel-name">
+                    ${item.channel}
+                </div>
+
+                <div class="
+                    status
+                    ${
+                        item.joined
+                        ? "joined"
+                        : "not-joined"
+                    }
+                ">
+
+                    ${
+                        item.joined
+                        ? "Joined"
+                        : "Not joined"
+                    }
+
+                </div>
+
+                ${
+                    item.joined
+                    ? ""
+                    : `
+                        <button
+                            class="join"
+                            onclick="
+                                openChannel(
+                                    '${username}'
+                                )
+                            "
+                        >
+                            Join Channel
+                        </button>
+                    `
+                }
+
+            `;
+
+
+            container.appendChild(box);
+
+        }
+    );
+}
+
+
+/* =====================================================
+   OPEN CHANNEL
+===================================================== */
+
+function openChannel(
+    username
+) {
+
+    tg.openTelegramLink(
+        `https://t.me/${username}`
+    );
+
+}
+
+
+/* =====================================================
+   CHECK MEMBERSHIP
+===================================================== */
+
+async function checkMembership() {
+
+    if (!telegramUser) {
+        return;
+    }
+
+
+    const result =
+        await api(
+            "/api/check-membership",
+            {
+                telegram_id:
+                    telegramUser.id
+            }
+        );
+
+
+    if (!result.ok) {
+
+        alert(
+            result.error ||
+            "Membership check failed"
+        );
+
+        return;
+    }
+
+
+    renderChannels(result);
+
+
+    if (result.all_joined) {
+
+        showApp();
+
+        loadBalance();
+
+    } else {
+
+        showGate();
+
+    }
+}
+
+
+/* =====================================================
+   SHOW GATE
+===================================================== */
+
+function showGate() {
+
+    document
+        .getElementById("loading")
+        .classList.add("hidden");
+
+    document
+        .getElementById("app")
+        .classList.add("hidden");
+
+    document
+        .getElementById("gate")
+        .classList.remove("hidden");
+}
+
+
+/* =====================================================
+   SHOW APP
+===================================================== */
+
+function showApp() {
+
+    document
+        .getElementById("loading")
+        .classList.add("hidden");
+
+    document
+        .getElementById("gate")
+        .classList.add("hidden");
+
+    document
+        .getElementById("app")
+        .classList.remove("hidden");
+}
+
+
+/* =====================================================
+   BALANCE
+===================================================== */
+
+function updateBalance(
+    amount
+) {
+
+    document
+        .getElementById("balance")
+        .textContent =
+            Number(amount || 0)
+            .toFixed(2);
+}
+
+
+async function loadBalance() {
+
+    const result =
+        await api(
+            "/api/balance",
+            {
+                telegram_id:
+                    telegramUser.id
+            }
+        );
+
+
+    if (result.ok) {
+
+        updateBalance(
+            result.balance
+        );
+
+    }
+}
+
+
+/* =====================================================
+   WATCH AD
+===================================================== */
+
+async function startAd() {
+
+    const result =
+        await api(
+            "/api/ad/start",
+            {
+                telegram_id:
+                    telegramUser.id
+            }
+        );
+
+
+    if (!result.ok) {
+
+        if (result.membership) {
+
+            renderChannels(
+                result.membership
+            );
+
+            showGate();
+
+        } else {
+
+            alert(
+                result.error ||
+                "Unable to start ad"
+            );
+
+        }
+
+        return;
+    }
+
+
+    /*
+       IMPORTANT:
+
+       The real ad provider must be integrated
+       here using its official reward/callback
+       mechanism.
+
+       Do NOT reward the user only because
+       JavaScript says the ad finished.
+    */
+
+
+    alert(
+        "Ad session started.\n\n" +
+        "Reward: " +
+        result.reward +
+        " ETB"
+    );
+
+
+    /*
+       Demo completion endpoint.
+       Replace this with the provider's
+       verified server-side callback.
+    */
+
+    const completed =
+        await api(
+            "/api/ad/complete",
+            {
+                telegram_id:
+                    telegramUser.id,
+
+                nonce:
+                    result.nonce
+            }
+        );
+
+
+    if (completed.ok) {
+
+        alert(
+            "+" +
+            completed.reward +
+            " ETB added"
+        );
+
+        loadBalance();
+
+    } else {
+
+        alert(
+            completed.error ||
+            "Reward failed"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   WITHDRAW
+===================================================== */
+
+async function withdraw() {
+
+    const amount =
+        prompt(
+            "Enter withdrawal amount:"
+        );
+
+    if (!amount) {
+        return;
+    }
+
+
+    const method =
+        prompt(
+            "Payment method (Telebirr/USDT):"
+        );
+
+    if (!method) {
+        return;
+    }
+
+
+    const account =
+        prompt(
+            "Enter your payment account:"
+        );
+
+    if (!account) {
+        return;
+    }
+
+
+    const result =
+        await api(
+            "/api/withdraw",
+            {
+                telegram_id:
+                    telegramUser.id,
+
+                amount:
+                    amount,
+
+                method:
+                    method,
+
+                account:
+                    account
+            }
+        );
+
+
+    if (!result.ok) {
+
+        if (result.membership) {
+
+            renderChannels(
+                result.membership
+            );
+
+            showGate();
+
+        }
+
+        alert(
+            result.error ||
+            "Withdrawal failed"
+        );
+
+        return;
+    }
+
+
+    alert(
+        "Withdrawal submitted successfully.\n" +
+        "ID: #" +
+        result.withdrawal_id
+    );
+
+
+    loadBalance();
+}
+
+
+/* =====================================================
+   AUTO RECHECK WHEN RETURNING TO MINI APP
+===================================================== */
+
+document.addEventListener(
+    "visibilitychange",
+    function() {
+
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
+
+            if (telegramUser) {
+
+                checkMembership();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   START
+===================================================== */
+
+init();
+
+</script>
+
+</body>
+  </html>
